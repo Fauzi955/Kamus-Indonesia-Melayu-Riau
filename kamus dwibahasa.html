@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kamus Dwibahasa Indonesia - Melayu Riau</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background-color: #fff;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #3498db;
+      color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    tr:nth-child(even) {
+      background-color: #f8f8f8;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    input[type="text"] {
+      width: calc(100% - 22px); /* Adjust for padding and border */
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 25px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    }
+    .example {
+      font-size: 0.9em;
+      color: #555;
+      font-style: italic;
+    }
+    .pagination {
+      margin-top: 25px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .pagination button {
+      padding: 8px 15px;
+      margin: 0 2px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+      font-size: 14px;
+    }
+    .pagination button:hover:not(.disabled) {
+      background-color: #2980b9;
+    }
+    .pagination button.disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kamus Dwibahasa<br>Indonesia - Melayu Riau</h1>
+  <input type="text" id="searchBox" placeholder="Cari kata Indonesia atau Melayu...">
+  <table>
+    <thead>
+      <tr>
+        <th>Bahasa Indonesia</th>
+        <th>Bahasa Melayu Riau</th>
+        <th>Kelas Kata</th>
+        <th>Contoh Kalimat</th>
+      </tr>
+    </thead>
+    <tbody id="dictionaryBody"></tbody>
+  </table>
+  <div class="pagination" id="pagination"></div>
+
+  <script>
+    // --- DATA KAMUS ANDA DIMULAI DI SINI ---
+    const data = [
+      ["Anak", "Budak", "Nomina", ""],
+      ["Air", "Ayè", "Nomina", ""],
+      ["Pergi", "Pegì", "Verba", "Aku nak pegì ke pasar."],
+      ["Pulang", "Balék", "Verba", "Bile kau balék dari kampong?"],
+      ["Makan", "Makè", "Verba", "Jom kite makè."],
+      ["Besar", "Besò", "Adjektiva", "Rumahnye besò nian."],
+      ["Kecil", "Kecék", "Adjektiva", "Bajunye kecék."],
+      ["Cantik", "Canték", "Adjektiva", "Bunge tu canték betul."],
+      ["Jeleq", "Jelek", "Adjektiva", "Rase makanan ni jelek."],
+      ["Duduk", "Dudok", "Verba", "Mari dudok sini."],
+      ["Berdiri", "Bèdìrì", "Verba", "Die tèrus bèdìrì."],
+      ["Tidur", "Tidò", "Verba", "Aku nak tidò lajò."],
+      ["Bangun", "Bangon", "Verba", "Pagi-pagi dah bangon."],
+      ["Jalan", "Jalan", "Verba", "Kite jalan-jalan yook."],
+      ["Lari", "Lajò", "Verba", "Jangan lajò-lajò, nanti jatuh."],
+      ["Minum", "Minom", "Verba", "Haus pulak, nak minom."],
+      ["Pakaian", "Pakéan", "Nomina", ""],
+      ["Rumah", "Rumah", "Nomina", ""],
+      ["Sekolah", "Sekolah", "Nomina", ""],
+      ["Pasar", "Pasar", "Nomina", ""],
+      ["Siapa", "Sape", "Pronomina Interogativa", ""],
+      ["Apa", "Ape", "Pronomina Interogativa", ""],
+      ["Di mana", "Kat mane", "Adverbia Interogativa", ""],
+      ["Kapan", "Bile", "Adverbia Interogativa", ""],
+      ["Mengapa", "Ngape", "Adverbia Interogativa", ""],
+      ["Bagaimana", "Macam mane", "Adverbia Interogativa", ""],
+      ["Saya", "Sayè", "Pronomina Persona", ""],
+      ["Kamu", "Kau", "Pronomina Persona", ""],
+      ["Dia", "Die", "Pronomina Persona", ""],
+      ["Kita", "Kite", "Pronomina Persona", ""],
+      ["Mereka", "Dorèng", "Pronomina Persona", ""],
+      ["Banyak", "Banyak", "Adjektiva", "Banyak orang datang."],
+      ["Sedikit", "Sikit", "Adjektiva", "Sikit saje makanan tu."],
+      ["Panas", "Panas", "Adjektiva", "Cuaca panas betul hari ni."],
+      ["Dingin", "Sejuk", "Adjektiva", "Minuman ni sejuk sangat."],
+      ["Dekat", "Dèkat", "Adjektiva", "Rumahnye dèkat dari sini."],
+      ["Jauh", "Jauh", "Adjektiva", "Kampongnye jauh."],
+      ["Baru", "Baru", "Adjektiva", "Baju baru sayè."],
+      ["Lama", "Lame", "Adjektiva", "Rumah lame tu."],
+      ["Senang", "Senang", "Adjektiva", "Hati sayè senang."],
+      ["Sedih", "Sedih", "Adjektiva", "Janganla sedih."],
+      ["Marah", "Marah", "Adjektiva", "Die marah sangat."],
+      ["Senyum", "Senyum", "Verba", "Die senyum-senyum saje."],
+      ["Tertawa", "Gelak", "Verba", "Die gelak kuat-kuat."],
+      ["Menangis", "Nangis", "Verba", "Budak tu nangis."],
+      ["Melihat", "Nengok", "Verba", "Aku nengok die tadi."],
+      ["Mendengar", "Dengar", "Verba", "Dengar ape yang aku cakap."],
+      ["Berbicara", "Cakap", "Verba", "Die pandai cakap."],
+      ["Menulis", "Nulih", "Verba", "Aku lagi nulih surat."],
+      ["Membaca", "Macè", "Verba", "Die lagi macè buku."],
+      ["Belajar", "Belajar", "Verba", "Rajin-rajinlah belajar."],
+      ["Mengajar", "Ngajar", "Verba", "Die ngajar bahasa Inggeris."],
+      ["Membeli", "Beli", "Verba", "Nak beli ape?"],
+      ["Menjual", "Jual", "Verba", "Die jual kue."],
+      ["Memasak", "Masak", "Verba", "Ibu lagi masak."],
+      ["Mencuci", "Nyuci", "Verba", "Aku nak nyuci baju."],
+      ["Membersihkan", "Bersihkan", "Verba", "Tolong bersihkan meja ni."],
+      ["Membuka", "Buka", "Verba", "Buka pintu tu."],
+      ["Menutup", "Tutup", "Verba", "Tutup jendelanye."],
+      ["Datang", "Datang", "Verba", "Bile kau nak datang?"],
+      ["Berangkat", "Berangèk", "Verba", "Die dah berangèk."],
+      ["Pulang", "Balék", "Verba", "Aku nak balék sekarang."],
+      ["Duduk", "Dudok", "Verba", "Sile dudok."],
+      ["Berdiri", "Bediri", "Verba", "Semua bediri!"],
+      ["Tidur", "Tidor", "Verba", "Aku nak tidor dulu."],
+      ["Bangun", "Bangon", "Verba", "Jam berape kau bangon?"],
+      ["Jalan", "Jalan", "Verba", "Mari jalan-jalan."],
+      ["Lari", "Lari", "Verba", "Lari laju-laju."],
+      ["Minum", "Minum", "Verba", "Ambilkan aku minum."],
+      ["Makan", "Makan", "Verba", "Dah makan belom?"],
+      ["Pakaian", "Pakain", "Nomina", ""],
+      ["Baju", "Baju", "Nomina", ""],
+      ["Celana", "Seluar", "Nomina", ""],
+      ["Sepatu", "Kasut", "Nomina", ""],
+      ["Topi", "Topi", "Nomina", ""],
+      ["Tas", "Beg", "Nomina", ""],
+      ["Buku", "Buku", "Nomina", ""],
+      ["Pensil", "Pensil", "Nomina", ""],
+      ["Pena", "Pen", "Nomina", ""],
+      ["Meja", "Meja", "Nomina", ""],
+      ["Kursi", "Kusi", "Nomina", ""],
+      ["Pintu", "Pintu", "Nomina", ""],
+      ["Jendela", "Jendela", "Nomina", ""],
+      ["Langit", "Langit", "Nomina", ""],
+      ["Bumi", "Bumi", "Nomina", ""],
+      ["Matahari", "Matahari", "Nomina", ""],
+      ["Bulan", "Bulan", "Nomina", ""],
+      ["Bintang", "Bintang", "Nomina", ""],
+      ["Awan", "Awan", "Nomina", ""],
+      ["Hujan", "Ujan", "Nomina", ""],
+      ["Angin", "Angin", "Nomina", ""],
+      ["Api", "Api", "Nomina", ""],
+      ["Kayu", "Kayu", "Nomina", ""],
+      ["Batu", "Batu", "Nomina", ""],
+      ["Tanah", "Tanah", "Nomina", ""],
+      ["Air", "Ayè", "Nomina", ""],
+      ["Gunung", "Gunong", "Nomina", ""],
+      ["Laut", "Laut", "Nomina", ""],
+      ["Sungai", "Sungai", "Nomina", ""],
+      ["Danau", "Danau", "Nomina", ""],
+      ["Pulau", "Pulau", "Nomina", ""],
+      ["Jalan", "Jalan", "Nomina", ""],
+      ["Kota", "Kota", "Nomina", ""],
+      ["Desa", "Kampong", "Nomina", ""],
+      ["Rumah", "Rumah", "Nomina", ""],
+      ["Pohon", "Pokok", "Nomina", ""],
+      ["Bunga", "Bunge", "Nomina", ""],
+      ["Buah", "Buah", "Nomina", ""],
+      ["Sayur", "Sayur", "Nomina", ""],
+      ["Nasi", "Nasi", "Nomina", ""],
+      ["Roti", "Roti", "Nomina", ""],
+      ["Gula", "Gule", "Nomina", ""],
+      ["Garam", "Garam", "Nomina", ""],
+      ["Susu", "Susu", "Nomina", ""],
+      ["Telur", "Telur", "Nomina", ""],
+      ["Daging", "Daging", "Nomina", ""],
+      ["Ikan", "Ikan", "Nomina", ""],
+      ["Ayam", "Ayam", "Nomina", ""],
+      ["Kucing", "Kucing", "Nomina", ""],
+      ["Anjing", "Anjing", "Nomina", ""],
+      ["Burung", "Burong", "Nomina", ""],
+      ["Ular", "Ular", "Nomina", ""],
+      ["Semut", "Semut", "Nomina", ""],
+      ["Nyamuk", "Nyamok", "Nomina", ""],
+      ["Lalat", "Lalat", "Nomina", ""],
+      ["Kupu-kupu", "Kupu-kupu", "Nomina", ""],
+      ["Ayam", "Ayam", "Nomina", ""],
+      ["Bebek", "Itik", "Nomina", ""],
+      ["Sapi", "Lembu", "Nomina", ""],
+      ["Kambing", "Kambing", "Nomina", ""],
+      ["Kerbau", "Kèrbau", "Nomina", ""],
+      ["Kuda", "Kude", "Nomina", ""],
+      ["Harimau", "Harimau", "Nomina", ""],
+      ["Singa", "Singa", "Nomina", ""],
+      ["Gajah", "Gajah", "Nomina", ""],
+      ["Buaya", "Buaye", "Nomina", ""],
+      ["Beruang", "Beruang", "Nomina", ""],
+      ["Serigala", "Serigale", "Nomina", ""],
+      ["Rubah", "Rubah", "Nomina", ""],
+      ["Monyet", "Monyet", "Nomina", ""],
+      ["Kera", "Kera", "Nomina", ""],
+      ["Tikus", "Tikus", "Nomina", ""],
+      ["Kelinci", "Kelinci", "Nomina", ""],
+      ["Babi", "Babi", "Nomina", ""],
+      ["Ulat", "Ulat", "Nomina", ""],
+      ["Cacing", "Cacing", "Nomina", ""],
+      ["Lebah", "Lebah", "Nomina", ""],
+      ["Kumbang", "Kumbang", "Nomina", ""],
+      ["Belalang", "Belalang", "Nomina", ""],
+      ["Katak", "Katak", "Nomina", ""],
+      ["Ubur-ubur", "Ubur-ubur", "Nomina", ""],
+      ["Paus", "Paus", "Nomina", ""],
+      ["Lumba-lumba", "Lumba-lumba", "Nomina", ""],
+      ["Hiu", "Ikan yu", "Nomina", ""],
+      ["Gurita", "Gurita", "Nomina", ""],
+      ["Cumi-cumi", "Sotong", "Nomina", ""],
+      ["Udang", "Udang", "Nomina", ""],
+      ["Kepiting", "Ketam", "Nomina", ""],
+      ["Kerang", "Kerang", "Nomina", ""],
+      ["Siput", "Siput", "Nomina", ""],
+      ["Kura-kura", "Kura-kura", "Nomina", ""],
+      ["Kadal", "Cicak", "Nomina", ""],
+      ["Cicak", "Cicak", "Nomina", ""],
+      ["Bunglon", "Bunglon", "Nomina", ""],
+      ["Tokek", "Tokek", "Nomina", ""],
+      ["Kupu-kupu", "Kupu-kupu", "Nomina", ""],
+      ["Capung", "Pepatung", "Nomina", ""],
+      ["Laba-laba", "Labe-labe", "Nomina", ""],
+      ["Kaki", "Kaki", "Nomina", ""],
+      ["Tangan", "Tangin", "Nomina", ""],
+      ["Kepala", "Kepale", "Nomina", ""],
+      ["Mata", "Mate", "Nomina", ""],
+      ["Hidung", "Hidung", "Nomina", ""],
+      ["Mulut", "Molot", "Nomina", ""],
+      ["Telinga", "Telinge", "Nomina", ""],
+      ["Rambut", "Rambot", "Nomina", ""],
+      ["Gigi", "Gigi", "Nomina", ""],
+      ["Lidah", "Lidah", "Nomina", ""],
+      ["Leher", "Leher", "Nomina", ""],
+      ["Bahu", "Bahu", "Nomina", ""],
+      ["Dada", "Dada", "Nomina", ""],
+      ["Perut", "Perot", "Nomina", ""],
+      ["Punggung", "Punggong", "Nomina", ""],
+      ["Jari", "Jari", "Nomina", ""],
+      ["Kuku", "Kuku", "Nomina", ""],
+      ["Kulit", "Kulit", "Nomina", ""],
+      ["Darah", "Darah", "Nomina", ""],
+      ["Tulang", "Tulang", "Nomina", ""],
+      ["Otot", "Otot", "Nomina", ""],
+      ["Jantung", "Jantong", "Nomina", ""],
+      ["Paru-paru", "Paru-paru", "Nomina", ""],
+      ["Hati", "Hati", "Nomina", ""],
+      ["Ginjal", "Ginjal", "Nomina", ""],
+      ["Otak", "Otak", "Nomina", ""],
+      ["Saraf", "Saraf", "Nomina", ""],
+      ["Rasa", "Rase", "Nomina", ""],
+      ["Bau", "Bau", "Nomina", ""],
+      ["Suara", "Suare", "Nomina", ""],
+      ["Warna", "Warna", "Nomina", ""],
+      ["Hitam", "Hitam", "Adjektiva", ""],
+      ["Putih", "Putih", "Adjektiva", ""],
+      ["Merah", "Merah", "Adjektiva", ""],
+      ["Kuning", "Kuneng", "Adjektiva", ""],
+      ["Hijau", "Ijo", "Adjektiva", ""],
+      ["Biru", "Biru", "Adjektiva", ""],
+      ["Ungu", "Ungu", "Adjektiva", ""],
+      ["Coklat", "Coklat", "Adjektiva", ""],
+      ["Abu-abu", "Abu-abu", "Adjektiva", ""],
+      ["Emas", "Emas", "Adjektiva", ""],
+      ["Perak", "Perak", "Adjektiva", ""],
+      ["Minggu", "Minggu", "Nomina", ""],
+      ["Senin", "Senin", "Nomina", ""],
+      ["Selasa", "Selase", "Nomina", ""],
+      ["Rabu", "Rabu", "Nomina", ""],
+      ["Kamis", "Kamih", "Nomina", ""],
+      ["Jumat", "Jumaat", "Nomina", ""],
+      ["Sabtu", "Sabtu", "Nomina", ""],
+      ["Pagi", "Pagi", "Nomina", ""],
+      ["Siang", "Siang", "Nomina", ""],
+      ["Sore", "Petang", "Nomina", ""],
+      ["Malam", "Malam", "Nomina", ""],
+      ["Tadi", "Tadi", "Adverbia", ""],
+      ["Besok", "Esok", "Adverbia", ""],
+      ["Lusa", "Luse", "Adverbia", ""],
+      ["Kemarin", "Kelmarin", "Adverbia", ""],
+      ["Sekarang", "Sekarang", "Adverbia", ""],
+      ["Nanti", "Nanti", "Adverbia", ""],
+      ["Dulu", "Dulu", "Adverbia", ""],
+      ["Baru saja", "Baru saje", "Adverbia", ""],
+      ["Sudah", "Dah", "Adverbia", ""],
+      ["Belum", "Belom", "Adverbia", ""],
+      ["Akan", "Nak", "Adverbia", ""],
+      ["Tidak", "Tak", "Adverbia", ""],
+      ["Bukan", "Bukan", "Adverbia", ""],
+      ["Ya", "Ye", "Interjeksi", ""],
+      ["Tidak", "Tak", "Interjeksi", ""],
+      ["Halo", "Halo", "Interjeksi", ""],
+      ["Selamat pagi", "Selamat pagi", "Interjeksi", ""],
+      ["Selamat malam", "Selamat malam", "Interjeksi", ""],
+      ["Terima kasih", "Terime kasih", "Interjeksi", ""],
+      ["Sama-sama", "Sama-same", "Interjeksi", ""],
+      ["Maaf", "Maaf", "Interjeksi", ""],
+      ["Permisi", "Permisi", "Interjeksi", ""],
+      ["Tolong", "Tolong", "Interjeksi", ""],
+      ["Bagaimana kabar?", "Macam mane kabar?", "Frasa", ""],
+      ["Baik-baik saja", "Baik-baik saje", "Frasa", ""],
+      ["Nama", "Name", "Nomina", ""],
+      ["Umur", "Umur", "Nomina", ""],
+      ["Tinggal", "Tinggal", "Verba", "Aku tinggal kat Pekanbaru."],
+      ["Alamat", "Alamat", "Nomina", ""],
+      ["Nomor telepon", "Nomor telepon", "Nomina", ""],
+      ["Pekerjaan", "Kerje", "Nomina", ""],
+      ["Mahasiswa", "Mahasiswa", "Nomina", ""],
+      ["Guru", "Guru", "Nomina", ""],
+      ["Dokter", "Doktor", "Nomina", ""],
+      ["Petani", "Petani", "Nomina", ""],
+      ["Nelayan", "Nelayan", "Nomina", ""],
+      ["Pedagang", "Pedagang", "Nomina", ""],
+      ["Karyawan", "Karyawan", "Nomina", ""],
+      ["Polisi", "Polis", "Nomina", ""],
+      ["Tentara", "Tentera", "Nomina", ""],
+      ["Pegawai", "Pegawai", "Nomina", ""],
+      ["Sopir", "Sopir", "Nomina", ""],
+      ["Koki", "Koki", "Nomina", ""],
+      ["Seniman", "Seniman", "Nomina", ""],
+      ["Penyanyi", "Penyanyi", "Nomina", ""],
+      ["Aktor", "Aktor", "Nomina", ""],
+      ["Penulis", "Penulih", "Nomina", ""],
+      ["Wartawan", "Wartawan", "Nomina", ""],
+      ["Programmer", "Programmer", "Nomina", ""],
+      ["Insinyur", "Insinyur", "Nomina", ""],
+      ["Arsitek", "Arsitek", "Nomina", ""],
+      ["Pilot", "Pilot", "Nomina", ""],
+      ["Pramugari", "Pramugari", "Nomina", ""],
+      ["Perawat", "Perawat", "Nomina", ""],
+      ["Bidan", "Bidan", "Nomina", ""],
+      ["Apoteker", "Apoteker", "Nomina", ""],
+      ["Ilmuwan", "Ilmuwan", "Nomina", ""],
+      ["Peneliti", "Peneliti", "Nomina", ""],
+      ["Ahli", "Ahli", "Nomina", ""],
+      ["Pemerintah", "Pemerintah", "Nomina", ""],
+      ["Negara", "Negare", "Nomina", ""],
+      ["Kota", "Kota", "Nomina", ""],
+      ["Daerah", "Daerah", "Nomina", ""],
+      ["Provinsi", "Provinsi", "Nomina", ""],
+      ["Kabupaten", "Kabupaten", "Nomina", ""],
+      ["Kecamatan", "Kecamatan", "Nomina", ""],
+      ["Desa", "Kampong", "Nomina", ""],
+      ["RT", "RT", "Nomina", ""],
+      ["RW", "RW", "Nomina", ""],
+      ["Jalan", "Jalan", "Nomina", ""],
+      ["Nomor", "Nomor", "Nomina", ""],
+      ["Blok", "Blok", "Nomina", ""],
+      ["Gang", "Gang", "Nomina", ""],
+      ["Komplek", "Komplek", "Nomina", ""],
+      ["Depan", "Depan", "Adverbia", ""],
+      ["Belakang", "Belakang", "Adverbia", ""],
+      ["Atas", "Atas", "Adverbia", ""],
+      ["Bawah", "Bawah", "Adverbia", ""],
+      ["Kanan", "Kanan", "Adverbia", ""],
+      ["Kiri", "Kiri", "Adverbia", ""],
+      ["Dalam", "Dalam", "Adverbia", ""],
+      ["Luar", "Luar", "Adverbia", ""],
+      ["Samping", "Samping", "Adverbia", ""],
+      ["Tengah", "Tengèh", "Adverbia", ""],
+      ["Ujung", "Ujong", "Adverbia", ""],
+      ["Pangkal", "Pangkal", "Adverbia", ""],
+      ["Sini", "Sini", "Adverbia", ""],
+      ["Situ", "Situ", "Adverbia", ""],
+      ["Sana", "Sane", "Adverbia", ""],
+      ["Di sini", "Kat sini", "Adverbia", ""],
+      ["Di situ", "Kat situ", "Adverbia", ""],
+      ["Di sana", "Kat sane", "Adverbia", ""],
+      ["Dari", "Dari", "Preposisi", ""],
+      ["Ke", "Ke", "Preposisi", ""],
+      ["Pada", "Pade", "Preposisi", ""],
+      ["Dengan", "Dengè", "Preposisi", ""],
+      ["Untuk", "Ontuk", "Preposisi", ""],
+      ["Oleh", "Oleh", "Preposisi", ""],
+      ["Tanpa", "Tanpe", "Preposisi", ""],
+      ["Melalui", "Melalui", "Preposisi", ""],
+      ["Antara", "Antare", "Preposisi", ""],
+      ["Di antara", "Di antare", "Preposisi", ""],
+      ["Dekat", "Dèkat", "Preposisi", ""],
+      ["Jauh", "Jauh", "Preposisi", ""],
+      ["Sebelum", "Sebelom", "Konjungsi", ""],
+      ["Sesudah", "Sesudah", "Konjungsi", ""],
+      ["Ketika", "Kètike", "Konjungsi", ""],
+      ["Saat", "Saak", "Konjungsi", ""],
+      ["Jika", "Jika", "Konjungsi", ""],
+      ["Kalau", "Kalo", "Konjungsi", ""],
+      ["Meskipun", "Meskipon", "Konjungsi", ""],
+      ["Agar", "Agar", "Konjungsi", ""],
+      ["Supaya", "Supaye", "Konjungsi", ""],
+      ["Karena", "Karèna", "Konjungsi", ""],
+      ["Sebab", "Sebab", "Konjungsi", ""],
+      ["Dan", "Dan", "Konjungsi", ""],
+      ["Atau", "Atau", "Konjungsi", ""],
+      ["Tetapi", "Tapi", "Konjungsi", ""],
+      ["Namun", "Namun", "Konjungsi", ""],
+      ["Serta", "Sertè", "Konjungsi", ""],
+      ["Lalu", "Laluh", "Konjungsi", ""],
+      ["Kemudian", "Kèmodian", "Konjungsi", ""],
+      ["Akhirnya", "Akhirnya", "Konjungsi", ""],
+      ["Pertama", "Pertame", "Adjektiva Ordinal", ""],
+      ["Kedua", "Kèdue", "Adjektiva Ordinal", ""],
+      ["Ketiga", "Kètige", "Adjektiva Ordinal", ""],
+      ["Satu", "Satu", "Numeralia", ""],
+      ["Dua", "Due", "Numeralia", ""],
+      ["Tiga", "Tige", "Numeralia", ""],
+      ["Empat", "Empat", "Numeralia", ""],
+      ["Lima", "Lime", "Numeralia", ""],
+      ["Enam", "Enam", "Numeralia", ""],
+      ["Tujuh", "Tujuh", "Numeralia", ""],
+      ["Delapan", "Delapan", "Numeralia", ""],
+      ["Sembilan", "Sembilan", "Numeralia", ""],
+      ["Sepuluh", "Sepoloh", "Numeralia", ""],
+      ["Sebelas", "Sebelas", "Numeralia", ""],
+      ["Dua belas", "Due belas", "Numeralia", ""],
+      ["Puluh", "Poloh", "Numeralia", ""],
+      ["Ratus", "Ratus", "Numeralia", ""],
+      ["Ribu", "Ribu", "Numeralia", ""],
+      ["Juta", "Jute", "Numeralia", ""],
+      ["Miliar", "Miliar", "Numeralia", ""],
+      ["Persen", "Persen", "Nomina", ""],
+      ["Setengah", "Setengèh", "Nomina", ""],
+      ["Seperempat", "Seperempat", "Nomina", ""],
+      ["Seluruh", "Seluruh", "Adjektiva", ""],
+      ["Semua", "Semue", "Adjektiva", ""],
+      ["Setiap", "Setiap", "Adjektiva", ""],
+      ["Beberapa", "Beberape", "Adjektiva", ""],
+      ["Banyak", "Banyak", "Adjektiva", ""],
+      ["Sedikit", "Sikit", "Adjektiva", ""],
+      ["Cukup", "Cukup", "Adjektiva", ""],
+      ["Kurang", "Kurang", "Adjektiva", ""],
+      ["Lebih", "Lebih", "Adjektiva", ""],
+      ["Sangat", "Sangat", "Adverbia", ""],
+      ["Terlalu", "Terlalu", "Adverbia", ""],
+      ["Agak", "Agak", "Adverbia", ""],
+      ["Paling", "Paling", "Adverbia", ""],
+      ["Hampir", "Hampir", "Adverbia", ""],
+      ["Selalu", "Selalu", "Adverbia", ""],
+      ["Kadang-kadang", "Kadang-kadang", "Adverbia", ""],
+      ["Jarang", "Jarang", "Adverbia", ""],
+      ["Tidak pernah", "Tak penah", "Adverbia", ""],
+      ["Sering", "Sering", "Adverbia", ""],
+      ["Umumnya", "Umumnye", "Adverbia", ""],
+      ["Biasanya", "Biaase", "Adverbia", ""],
+      ["Khususnya", "Khosusnye", "Adverbia", ""],
+      ["Terutama", "Terutame", "Adverbia", ""],
+      ["Akhirnya", "Akhirnya", "Adverbia", ""],
+      ["Tiba-tiba", "Tibe-tibe", "Adverbia", ""],
+      ["Langsung", "Langsong", "Adverbia", ""],
+      ["Pelan-pelan", "Pelan-pelan", "Adverbia", ""],
+      ["Cepat", "Cepat", "Adverbia", ""],
+      ["Lambat", "Lambat", "Adverbia", ""],
+      ["Betul", "Betul", "Adverbia", ""],
+      ["Salah", "Salah", "Adverbia", ""],
+      ["Benar", "Benar", "Adverbia", ""],
+      ["Palsu", "Palsu", "Adjektiva", ""],
+      ["Asli", "Asli", "Adjektiva", ""],
+      ["Resmi", "Resmi", "Adjektiva", ""],
+      ["Tidak resmi", "Tak resmi", "Adjektiva", ""],
+      ["Lengkap", "Lengkap", "Adjektiva", ""],
+      ["Kurang", "Kurang", "Adjektiva", ""],
+      ["Penuh", "Penoh", "Adjektiva", ""],
+      ["Kosong", "Kosong", "Adjektiva", ""],
+      ["Terbuka", "Terbuka", "Adjektiva", ""],
+      ["Tertutup", "Tertutup", "Adjektiva", ""],
+      ["Bersih", "Bersih", "Adjektiva", ""],
+      ["Kotor", "Kotor", "Adjektiva", ""],
+      ["Rapi", "Rapi", "Adjektiva", ""],
+      ["Berantakan", "Berantakan", "Adjektiva", ""],
+      ["Lurus", "Lurus", "Adjektiva", ""],
+      ["Bengkok", "Bengkok", "Adjektiva", ""],
+      ["Tebal", "Tebal", "Adjektiva", ""],
+      ["Tipis", "Tipis", "Adjektiva", ""],
+      ["Panjang", "Panjang", "Adjektiva", ""],
+      ["Pendek", "Pendek", "Adjektiva", ""],
+      ["Lebar", "Lebar", "Adjektiva", ""],
+      ["Sempit", "Sempit", "Adjektiva", ""],
+      ["Tinggi", "Tinggi", "Adjektiva", ""],
+      ["Rendah", "Rendah", "Adjektiva", ""],
+      ["Ringan", "Ringan", "Adjektiva", ""],
+      ["Berat", "Berat", "Adjektiva", ""],
+      ["Kuat", "Kuat", "Adjektiva", ""],
+      ["Lemah", "Lemah", "Adjektiva", ""],
+      ["Cerdas", "Cerdas", "Adjektiva", ""],
+      ["Bodoh", "Bodoh", "Adjektiva", ""],
+      ["Rajin", "Rajin", "Adjektiva", ""],
+      ["Malas", "Malas", "Adjektiva", ""],
+      ["Sabar", "Sabar", "Adjektiva", ""],
+      ["Emosi", "Emosi", "Adjektiva", ""],
+      ["Tenang", "Tenang", "Adjektiva", ""],
+      ["Gelisah", "Gelisah", "Adjektiva", ""],
+      ["Baik", "Baik", "Adjektiva", ""],
+      ["Jahat", "Jahat", "Adjektiva", ""],
+      ["Ramah", "Ramah", "Adjektiva", ""],
+      ["Sombong", "Sombong", "Adjektiva", ""],
+      ["Rendah hati", "Rendah hati", "Adjektiva", ""],
+      ["Pelit", "Kedekut", "Adjektiva", ""],
+      ["Dermawan", "Dermawan", "Adjektiva", ""],
+      ["Jujur", "Jujur", "Adjektiva", ""],
+      ["Bohong", "Bohong", "Adjektiva", ""],
+      ["Setia", "Setie", "Adjektiva", ""],
+      ["Pengkhianat", "Pengkhianat", "Nomina", ""],
+      ["Berani", "Berani", "Adjektiva", ""],
+      ["Takut", "Takot", "Adjektiva", ""],
+      ["Gembira", "Gembira", "Adjektiva", ""],
+      ["Susah", "Susah", "Adjektiva", ""],
+      ["Sakit", "Sakit", "Adjektiva", ""],
+      ["Sehat", "Sehat", "Adjektiva", ""],
+      ["Lapar", "Lapar", "Adjektiva", ""],
+      ["Haus", "Haus", "Adjektiva", ""],
+      ["Kenyang", "Kenyang", "Adjektiva", ""],
+      ["Mengantuk", "Ngantuk", "Adjektiva", ""],
+      ["Capek", "Capek", "Adjektiva", ""],
+      ["Lelah", "Lelah", "Adjektiva", ""],
+      ["Segar", "Segar", "Adjektiva", ""],
+      ["Enak", "Sedap", "Adjektiva", "Makanan ni sedap sangat."],
+      ["Tidak enak", "Tak sedap", "Adjektiva", "Makanan ni tak sedap."],
+      ["Manis", "Manis", "Adjektiva", ""],
+      ["Asin", "Masin", "Adjektiva", ""],
+      ["Pahit", "Pahit", "Adjektiva", ""],
+      ["Asam", "Asam", "Adjektiva", ""],
+      ["Pedas", "Pedas", "Adjektiva", ""],
+      ["Hambar", "Hambar", "Adjektiva", ""],
+      ["Baru", "Baru", "Adjektiva", "Baju baru sayè."],
+      ["Lama", "Lame", "Adjektiva", "Rumah lame tu."]
+    ];
+    // --- DATA KAMUS ANDA BERAKHIR DI SINI ---
+
+    const dictionaryBody = document.getElementById("dictionaryBody");
+    const pagination = document.getElementById("pagination");
+    const searchBox = document.getElementById("searchBox");
+
+    let filteredData = [];
+    let currentPage = 1;
+    const itemsPerPage = 20; // Jumlah item per halaman
+
+    // Fungsi untuk merender tabel kamus
+    function renderTable(dataSlice) {
+      dictionaryBody.innerHTML = ""; // Kosongkan isi tabel
+      dataSlice.forEach(([indo, melayu, kelas, contoh]) => {
+        const row = `<tr>
+                       <td>${indo}</td>
+                       <td>${melayu}</td>
+                       <td>${kelas || '-'}</td> <td class="example">${contoh || '-'}</td> </tr>`;
+        dictionaryBody.innerHTML += row;
+      });
+    }
+
+    // Fungsi untuk merender tombol paginasi
+    function renderPagination(totalItems) {
+      pagination.innerHTML = "";
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+      // Tambahkan tombol Previous
+      const prevButton = document.createElement("button");
+      prevButton.textContent = "Sebelumnya";
+      prevButton.classList.toggle("disabled", currentPage === 1);
+      prevButton.disabled = currentPage === 1;
+      prevButton.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          updateDisplay();
+        }
+      });
+      pagination.appendChild(prevButton);
+
+      // Tambahkan tombol angka halaman
+      for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement("button");
+        button.textContent = i;
+        button.classList.toggle("disabled", i === currentPage);
+        button.disabled = i === currentPage;
+        button.addEventListener("click", () => {
+          currentPage = i;
+          updateDisplay();
+        });
+        pagination.appendChild(button);
+      }
+
+      // Tambahkan tombol Next
+      const nextButton = document.createElement("button");
+      nextButton.textContent = "Selanjutnya";
+      nextButton.classList.toggle("disabled", currentPage === totalPages || totalPages === 0);
+      nextButton.disabled = currentPage === totalPages || totalPages === 0;
+      nextButton.addEventListener("click", () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          updateDisplay();
+        }
+      });
+      pagination.appendChild(nextButton);
+    }
+
+    // Fungsi untuk memperbarui tampilan (tabel dan paginasi)
+    function updateDisplay() {
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      renderTable(filteredData.slice(start, end));
+      renderPagination(filteredData.length);
+    }
+
+    // Fungsi untuk memfilter data berdasarkan query pencarian
+    function filterData(query) {
+      return data.filter(([indo, melayu]) =>
+        indo.toLowerCase().includes(query.toLowerCase()) ||
+        melayu.toLowerCase().includes(query.toLowerCase())
+      );
+    }
+
+    // Event listener untuk kotak pencarian
+    searchBox.addEventListener("input", function () {
+      currentPage = 1; // Reset ke halaman pertama setiap kali ada pencarian baru
+      filteredData = filterData(this.value);
+      updateDisplay();
+    });
+
+    // Inisialisasi tampilan awal saat halaman dimuat
+    filteredData = data; // Awalnya, semua data ditampilkan
+    updateDisplay();
+  </script>
+</body>
+</html>
